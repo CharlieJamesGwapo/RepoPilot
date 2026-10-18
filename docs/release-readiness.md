@@ -24,6 +24,6 @@ Checksums validate consistency with published checksum files; the project does n
 
 ## Verification and release gate
 
-Local macOS ARM64 checks: 98 Rust tests, strict Clippy, formatting, native candidate packaging and seven POSIX installer regressions. Candidate CI additionally packages each native runner's binary and exercises Windows installers with PowerShell 7 and Windows PowerShell 5. Consult the current pull request's checks for actual hosted status.
+Local macOS ARM64 checks: 99 Rust tests, strict Clippy, formatting, native candidate packaging and seven POSIX installer regressions. Candidate CI additionally packages each native runner's binary and exercises Windows installers with PowerShell 7 and Windows PowerShell 5. Consult the current pull request's checks for actual hosted status.
 
 Before publishing a stable version, require green candidate CI and dependency audit, independent review, accurate release notes and deliberate stable version/installer updates. A release tag triggers publication; no candidate tag was created during this review. Then verify the actual downloads on all four targets, update the Homebrew formula from published checksums, and pass both Mac architectures' Homebrew jobs. Preserve all older release assets.

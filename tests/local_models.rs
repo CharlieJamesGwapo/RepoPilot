@@ -181,3 +181,24 @@ fn saved_config_leaf_case_alias_is_conservatively_rejected() {
     assert!(!parent.join("config.toml").exists());
     assert!(String::from_utf8_lossy(&result.stderr).contains("saved user configuration"));
 }
+
+#[test]
+fn setup_does_not_turn_shell_metacharacter_paths_into_pasteable_commands() {
+    let root = TempDir::new().unwrap();
+    let out = run(
+        &root,
+        &[
+            "models",
+            "setup",
+            "light",
+            "--output",
+            "$(touch INJECTED).toml",
+        ],
+    );
+    assert!(out.status.success());
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert!(text.contains("quote paths for your shell"));
+    assert!(!text.contains("repopilot --config \"$("));
+    assert!(!root.path().join("INJECTED").exists());
+    assert!(root.path().join("$(touch INJECTED).toml").exists());
+}

@@ -171,7 +171,7 @@ pub fn run(action: &ModelAction, json: bool, quiet: bool) -> Result<()> {
                 )?
             } else if !quiet {
                 output::emit(&format!(
-                    "Created explicit local configuration: {:?}\nModel: {} (~{} weights; {})\n{}\nSource: {}\nRuntime tag: {}\nManual opt-in download: {}\nWith your compatible local runtime running: repopilot --config {:?} chat --local\nNo download, service startup or network request performed. Saved user configuration is unchanged. Runtime/context need extra memory; review generated code and commands before using them.",
+                    "Created explicit local configuration: {:?}\nModel: {} (~{} weights; {})\n{}\nSource: {}\nRuntime tag: {}\nManual opt-in download: {}\nWith your compatible local runtime running, use --config with the output path shown above and run chat --local (quote paths for your shell).\nNo download, service startup or network request performed. Saved user configuration is unchanged. Runtime/context need extra memory; review generated code and commands before using them.",
                     path,
                     p.model,
                     p.approximate_weights,
@@ -179,8 +179,7 @@ pub fn run(action: &ModelAction, json: bool, quiet: bool) -> Result<()> {
                     p.guidance,
                     p.source,
                     p.runtime_source,
-                    p.pull_command,
-                    path
+                    p.pull_command
                 ))?;
             }
         }
