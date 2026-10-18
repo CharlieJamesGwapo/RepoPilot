@@ -1,6 +1,6 @@
 # Releasing RepoPilot
 
-Repository: [CharlieJamesGwapo/RepoPilot](https://github.com/CharlieJamesGwapo/RepoPilot). Release: [v0.2.0](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.2.0).
+Repository: [CharlieJamesGwapo/RepoPilot](https://github.com/CharlieJamesGwapo/RepoPilot). Release: [v0.3.0](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.3.0).
 
 1. Review the version, changelog, README, installer defaults, and documentation against actual behavior. Commit `Cargo.lock`; confirm dependency licenses and MIT licensing. Establish private security reporting and a community contact.
 2. Run formatting, strict Clippy, and all tests. Exercise core diagnostics offline, permission failures, local-only restrictions, saved-local chat, real-shell behavior, and installer failure paths with fixtures.
@@ -12,11 +12,11 @@ Repository: [CharlieJamesGwapo/RepoPilot](https://github.com/CharlieJamesGwapo/R
 
 Targets: `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu`, and `x86_64-pc-windows-msvc`. Linux builds use Ubuntu 22.04. Unsupported architectures or older runtime libraries may require building from source.
 
-Installers default to version `v0.2.0`. The shell installer supports `REPOPILOT_VERSION` and `REPOPILOT_INSTALL_DIR`; PowerShell supports `-Version` and `-InstallDir`. Both verify downloads before extraction/version validation and atomic replacement, and print PATH instructions without editing user configuration. Update installer defaults deliberately for the next release.
+Installers default to version `v0.3.0`. The shell installer supports `REPOPILOT_VERSION` and `REPOPILOT_INSTALL_DIR`; PowerShell supports `-Version` and `-InstallDir`. Both verify downloads before extraction/version validation and atomic replacement, and print PATH instructions without editing user configuration. Update installer defaults deliberately for the next release.
 
 ## Homebrew tap maintenance
 
-The separate public [homebrew-tap repository](https://github.com/CharlieJamesGwapo/homebrew-tap) provides `brew install charliejamesgwapo/tap/repopilot`. Keep it distinct from Homebrew core. The formula selects the immutable published macOS v0.2.0 archives by CPU architecture and verifies their published SHA-256 digests; installation needs no Rust toolchain. It generates bash/zsh/fish completions and installs project documentation in Homebrew's documentation directory.
+The separate public [homebrew-tap repository](https://github.com/CharlieJamesGwapo/homebrew-tap) provides `brew install charliejamesgwapo/tap/repopilot`. Keep it distinct from Homebrew core. The formula selects the immutable published macOS v0.3.0 archives by CPU architecture and verifies their published SHA-256 digests; installation needs no Rust toolchain. It generates bash/zsh/fish completions and installs project documentation in Homebrew's documentation directory.
 
 Before merging tap changes, validate installation, `--version`, offline commands, completions, documentation, and uninstall on both Intel and Apple Silicon macOS. Retain actual CI job results before reporting either platform passed. Test the absolute Homebrew binary as well as PATH lookup because an existing local installation may shadow it. Do not delete a user's older binary or install AI tools, accounts, or models.
 

@@ -93,4 +93,4 @@ The two-line prompt is `[RepoPilot] my-project git:(main)` followed by `> `. A d
 
 Built-in skills are included in v0.2.0 binaries and Homebrew installations. See [skills](skills.md) for output, export, and attribution details.
 
-Current release-candidate source additionally supports `ask --max-output-tokens 1..32768`, `chat --max-output-tokens 1..32768`, `/budget`, and `/usage`. See [token controls](token-controls.md) and [local models](local-models.md); these are not in published v0.2.0 yet.
+RepoPilot v0.3.0 additionally supports `ask --max-output-tokens 1..32768`, `chat --max-output-tokens 1..32768`, `/budget`, and `/usage`. See [token controls](token-controls.md) and [local models](local-models.md); these are included in v0.3.0 binaries and Homebrew installations.

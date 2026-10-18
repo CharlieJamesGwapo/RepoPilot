@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0-rc.1 — unreleased candidate
+## 0.3.0 — 2026-10-18
 
 - Reject control characters in configured endpoint, model and executable metadata before they can spoof consent or terminal output.
 - Preserve valid Bash prompt hooks ending with semicolons and comments.
