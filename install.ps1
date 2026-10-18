@@ -46,7 +46,8 @@ try {
     $installTemp = Join-Path $InstallDir ('.repopilot-install-' + [guid]::NewGuid().ToString('N') + '.exe')
     Copy-Item -LiteralPath $binary -Destination $installTemp
     if (Test-Path -LiteralPath $destination) {
-        [IO.File]::Replace($installTemp, $destination, $null)
+        # PowerShell casts $null to an empty string for this .NET parameter.
+        [IO.File]::Replace($installTemp, $destination, [NullString]::Value)
     } else {
         [IO.File]::Move($installTemp, $destination)
     }

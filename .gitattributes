@@ -1,0 +1,2 @@
+# Keep published scripts byte-identical across native checkout platforms.
+* text=auto eol=lf

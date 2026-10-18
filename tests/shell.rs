@@ -101,7 +101,8 @@ mod unix {
             vec!["--config", "missing.toml"],
             vec!["shell", "--json"],
         ] {
-            let o = run(&root, &args, "exit\n");
+            // Invalid options exit before launching a shell or reading stdin.
+            let o = run(&root, &args, "");
             assert_eq!(o.status.code(), Some(2));
             assert!(o.stdout.is_empty());
             assert!(String::from_utf8_lossy(&o.stderr).contains("shell"));

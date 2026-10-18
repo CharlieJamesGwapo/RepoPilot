@@ -51,6 +51,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/test_windows_installer.ps1 -PackageDir dist -Version $env:GITHUB_REF_NAME
+      - name: Windows PowerShell 5 installer regression tests
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: ./scripts/test_windows_installer.ps1 -PackageDir dist -Version $env:GITHUB_REF_NAME
       - uses: actions/upload-artifact@v4
         with:
           name: repopilot-${{ matrix.target }}
