@@ -1,18 +1,18 @@
 param([Parameter(Mandatory=$true)][string]$PackageDir, [string]$Version='v0.1.0')
 $ErrorActionPreference='Stop'
-$fixtureDir = (Resolve-Path $PackageDir).Path
-$script:corruptChecksum = $false
+$packageSource = (Resolve-Path $PackageDir).Path
 function Invoke-WebRequest {
     param([string]$Uri, [string]$OutFile, [switch]$UseBasicParsing)
     $filename = ([Uri]$Uri).Segments[-1]
-    if ($script:corruptChecksum -and $filename.EndsWith('.sha256')) {
-        [IO.File]::WriteAllText($OutFile, ('0' * 64))
-    } else {
-        Copy-Item -LiteralPath (Join-Path $fixtureDir $filename) -Destination $OutFile
-    }
+    Copy-Item -LiteralPath (Join-Path $fixtureDir $filename) -Destination $OutFile
 }
 $location = Join-Path ([IO.Path]::GetTempPath()) ('repopilot-test-' + [guid]::NewGuid().ToString('N'))
 try {
+    $fixtureDir = Join-Path $location 'downloads'
+    New-Item -ItemType Directory -Path $fixtureDir -Force | Out-Null
+    Get-ChildItem -LiteralPath $packageSource -File | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $fixtureDir
+    }
     $installDir = Join-Path $location 'bin with spaces'
     & "$PSScriptRoot/../install.ps1" -Version $Version -InstallDir $installDir
     $binary = Join-Path $installDir 'repopilot.exe'
@@ -22,7 +22,8 @@ try {
     # Check updating an existing installation using the same archive.
     & "$PSScriptRoot/../install.ps1" -Version $Version -InstallDir $installDir
     if ((Get-FileHash -LiteralPath $binary).Hash -ne $before) { throw 'Repeated installation changed binary unexpectedly.' }
-    $script:corruptChecksum = $true
+    $checksumPath = Join-Path $fixtureDir "repopilot-$Version-x86_64-pc-windows-msvc.zip.sha256"
+    [IO.File]::WriteAllText($checksumPath, ('0' * 64))
     $rejected = $false
     try { & "$PSScriptRoot/../install.ps1" -Version $Version -InstallDir $installDir }
     catch { if ($_.Exception.Message -notlike '*SHA-256 mismatch*') { throw }; $rejected = $true }
