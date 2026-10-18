@@ -1,7 +1,9 @@
+#[cfg(unix)]
+use std::process::Stdio;
 use std::{
     fs,
     io::{Read, Write},
-    process::{Command, Stdio},
+    process::Command,
     time::{Duration, Instant},
 };
 use tempfile::TempDir;
