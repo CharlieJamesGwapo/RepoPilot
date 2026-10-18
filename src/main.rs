@@ -6,11 +6,16 @@ mod output;
 mod project;
 mod providers;
 mod shell;
+mod skills;
 mod welcome;
 use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
 use cli::{Cli, Cmd, ConfigAction, Format, ProviderAction};
 fn execute(cli: Cli) -> Result<i32> {
+    if let Some(Cmd::Skills { ref action }) = cli.command {
+        skills::run(action, cli.json, cli.quiet)?;
+        return Ok(0);
+    }
     if let Some(Cmd::Guide { ref task }) = cli.command {
         guides::run(task, cli.json, cli.quiet)?;
         return Ok(0);

@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$PackageDir, [string]$Version='v0.1.0')
+param([Parameter(Mandatory=$true)][string]$PackageDir, [string]$Version='v0.2.0')
 $ErrorActionPreference='Stop'
 $packageSource = (Resolve-Path $PackageDir).Path
 function Invoke-WebRequest {

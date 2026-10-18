@@ -1,6 +1,6 @@
 # Installation
 
-Download RepoPilot from the [v0.1.0 release](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.1.0). Supported binary targets are Apple Silicon macOS, Intel macOS, x86-64 Linux GNU, and x86-64 Windows. Linux binaries are built on Ubuntu 22.04; older system libraries or other architectures may require a source build.
+Download RepoPilot from the [v0.2.0 release](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.2.0). Supported binary targets are Apple Silicon macOS, Intel macOS, x86-64 Linux GNU, and x86-64 Windows. Linux binaries are built on Ubuntu 22.04; older system libraries or other architectures may require a source build.
 
 ## macOS: Homebrew (recommended)
 
@@ -10,7 +10,7 @@ If Homebrew is already installed, run:
 brew install charliejamesgwapo/tap/repopilot
 ```
 
-This is the project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap), not a Homebrew core formula. The formula selects the published v0.1.0 Apple Silicon or Intel binary and verifies its SHA-256 checksum. No Rust toolchain is required. Bash, zsh, and fish completion definitions and project documentation are installed through Homebrew; documents are available under `$(brew --prefix)/share/doc/repopilot`. Use your shell's normal completion setup if necessary.
+This is the project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap), not a Homebrew core formula. The formula selects the published v0.2.0 Apple Silicon or Intel binary and verifies its SHA-256 checksum. No Rust toolchain is required. Bash, zsh, and fish completion definitions and project documentation are installed through Homebrew; documents are available under `$(brew --prefix)/share/doc/repopilot`. Use your shell's normal completion setup if necessary.
 
 To update:
 
@@ -41,16 +41,16 @@ The tap's CI is intended to validate Apple Silicon and Intel macOS separately. A
 Download the installer to a file, review it, then run it:
 
 ```sh
-curl --fail --location --output install.sh https://github.com/CharlieJamesGwapo/RepoPilot/releases/download/v0.1.0/install.sh
+curl --fail --location --output install.sh https://github.com/CharlieJamesGwapo/RepoPilot/releases/download/v0.2.0/install.sh
 less install.sh
 sh install.sh
 "$HOME/.local/bin/repopilot" --version
 ```
 
-The installer selects the supported OS/CPU archive, downloads its SHA-256 checksum, verifies the archive before extracting, checks the binary version, and replaces the installed executable atomically. It defaults to `v0.1.0` and `$HOME/.local/bin`. To choose a directory or version:
+The installer selects the supported OS/CPU archive, downloads its SHA-256 checksum, verifies the archive before extracting, checks the binary version, and replaces the installed executable atomically. It defaults to `v0.2.0` and `$HOME/.local/bin`. To choose a directory or version:
 
 ```sh
-REPOPILOT_VERSION=v0.1.0 REPOPILOT_INSTALL_DIR="$HOME/.local/bin" sh install.sh
+REPOPILOT_VERSION=v0.2.0 REPOPILOT_INSTALL_DIR="$HOME/.local/bin" sh install.sh
 ```
 
 It does not change PATH. If necessary, add `export PATH="$HOME/.local/bin:$PATH"` to your shell configuration, then open a new terminal or source that configuration.
@@ -58,9 +58,9 @@ It does not change PATH. If necessary, add `export PATH="$HOME/.local/bin:$PATH"
 ## Windows PowerShell
 
 ```powershell
-Invoke-WebRequest -Uri 'https://github.com/CharlieJamesGwapo/RepoPilot/releases/download/v0.1.0/install.ps1' -OutFile install.ps1
+Invoke-WebRequest -Uri 'https://github.com/CharlieJamesGwapo/RepoPilot/releases/download/v0.2.0/install.ps1' -OutFile install.ps1
 Get-Content .\install.ps1
-& .\install.ps1 -Version v0.1.0
+& .\install.ps1 -Version v0.2.0
 & "$env:LOCALAPPDATA\RepoPilot\bin\repopilot.exe" --version
 ```
 
@@ -72,16 +72,16 @@ Choose the archive matching your machine from the release page and download its 
 
 ```sh
 # Linux
-sha256sum --check repopilot-v0.1.0-x86_64-unknown-linux-gnu.tar.gz.sha256
+sha256sum --check repopilot-v0.2.0-x86_64-unknown-linux-gnu.tar.gz.sha256
 # macOS, using the downloaded macOS checksum file instead
-shasum -a 256 --check repopilot-v0.1.0-aarch64-apple-darwin.tar.gz.sha256
+shasum -a 256 --check repopilot-v0.2.0-aarch64-apple-darwin.tar.gz.sha256
 ```
 
 On Windows, compare the entire hash with the value in the matching checksum file:
 
 ```powershell
-Get-FileHash .\repopilot-v0.1.0-x86_64-pc-windows-msvc.zip -Algorithm SHA256
-Get-Content .\repopilot-v0.1.0-x86_64-pc-windows-msvc.zip.sha256
+Get-FileHash .\repopilot-v0.2.0-x86_64-pc-windows-msvc.zip -Algorithm SHA256
+Get-Content .\repopilot-v0.2.0-x86_64-pc-windows-msvc.zip.sha256
 ```
 
 Proceed only when the hashes match. Extract the archive, run the included executable with `--version`, then copy it to a directory on PATH. The binaries are unsigned and macOS binaries are not notarized. A checksum detects corruption against the published checksum; it is not a code-signing identity.

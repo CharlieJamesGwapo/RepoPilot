@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-18
+
+- Add ten offline development and UI/UX skills with list/show commands and explicit, non-overwriting project exports for portable use, Codex, and Claude. Development adaptations include Superpowers MIT attribution; published v0.1.0 binaries remain unchanged.
 
 - Add macOS installation through the project's third-party Homebrew tap, with Apple Silicon/Intel binary selection, shell completions, and installed documentation. The published v0.1.0 binaries and release history remain unchanged.
 - Expand installation guidance for Homebrew updates, removal, and existing binaries on PATH.

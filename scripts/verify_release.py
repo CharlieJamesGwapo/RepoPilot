@@ -78,6 +78,20 @@ def main():
         report = subprocess.check_output([binary, "scan", str(fixture), "--json"], env=env, text=True)
         assert json.loads(report)["schema_version"] == 1
         checks.append("help, welcome, offline guide and project JSON scan work")
+        skills = json.loads(subprocess.check_output([binary, "skills", "list", "--json"], env=env, text=True))
+        assert len(skills) == 10
+        for target in ["portable", "codex", "claude"]:
+            command_args = [binary, "skills", "export", "debugging", "--path", str(fixture), "--target", target, "--json"]
+            planned = json.loads(subprocess.check_output([*command_args, "--dry-run"], env=env, text=True))
+            assert planned["status"] == "planned" and not Path(planned["destination"]).exists()
+            exported = json.loads(subprocess.check_output(command_args, env=env, text=True))
+            dest = Path(exported["destination"])
+            assert "name: repopilot-debugging" in (dest / "SKILL.md").read_text()
+            assert "Jesse Vincent" in (dest / "LICENSE.txt").read_text()
+            assert "Superpowers" in (dest / "NOTICE.md").read_text()
+            refused = subprocess.run(command_args, env=env, capture_output=True, text=True)
+            assert refused.returncode != 0 and "already exists" in refused.stderr
+        checks.append("ten built-in skills; all three project export targets, dry-run, attribution and overwrite refusal work")
         env["SHELL"] = "/bin/sh"
         script = "echo REPOPILOT_INSTALL_SHELL_OK\r\nexit /b 0\r\n" if windows else "printf 'REPOPILOT_INSTALL_SHELL_OK\\n'\nexit 0\n"
         result = subprocess.run([binary, "shell", "--plain-prompt"], input=script, capture_output=True, text=True, env=env, check=True)

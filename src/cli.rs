@@ -37,6 +37,11 @@ pub enum Format {
 pub enum Cmd {
     /// Preview the branded welcome screen without launching a shell.
     Welcome,
+    /// Browse offline skills or explicitly export one into a project.
+    Skills {
+        #[command(subcommand)]
+        action: SkillAction,
+    },
     /// Show curated offline workflows; omit the task to list topics. Executes nothing.
     Guide { task: Vec<String> },
     /// Open your real shell with normal terminal support (also the default).
@@ -143,4 +148,60 @@ pub enum ProviderAction {
         #[command(flatten)]
         options: AiOptions,
     },
+}
+
+#[derive(Subcommand)]
+pub enum SkillAction {
+    /// List the ten bundled skills; no configuration or network access.
+    List {
+        #[arg(long, value_enum)]
+        pack: Option<SkillPack>,
+    },
+    /// Print a bundled SKILL.md for review.
+    Show { name: String },
+    /// Export one skill without overwriting existing files.
+    Export {
+        name: String,
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        #[arg(long, value_enum, default_value = "portable")]
+        target: SkillTarget,
+        #[arg(long)]
+        dry_run: bool,
+    },
+}
+#[derive(Clone, Copy, ValueEnum)]
+pub enum SkillPack {
+    Development,
+    UiUx,
+}
+impl SkillPack {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Development => "development",
+            Self::UiUx => "ui-ux",
+        }
+    }
+}
+#[derive(Clone, Copy, ValueEnum)]
+pub enum SkillTarget {
+    Portable,
+    Codex,
+    Claude,
+}
+impl SkillTarget {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Portable => "portable",
+            Self::Codex => "codex",
+            Self::Claude => "claude",
+        }
+    }
+    pub fn directory(self) -> &'static str {
+        match self {
+            Self::Portable => ".repopilot",
+            Self::Codex => ".agents",
+            Self::Claude => ".claude",
+        }
+    }
 }

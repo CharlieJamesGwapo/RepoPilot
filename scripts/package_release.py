@@ -27,15 +27,19 @@ def main():
         stage = Path(directory) / name
         stage.mkdir()
         shutil.copy2(source, stage / source.name)
-        for filename in ["README.md", "LICENSE", "CHANGELOG.md", "install.sh", "install.ps1"]:
+        for filename in ["README.md", "LICENSE", "CHANGELOG.md", "THIRD_PARTY_NOTICES.md", "install.sh", "install.ps1"]:
             shutil.copy2(filename, stage / filename)
         shutil.copytree("docs", stage / "docs")
+        shutil.copytree("licenses", stage / "licenses")
         archive = Path(shutil.make_archive(str(dist / name), "zip" if source.name.endswith(".exe") else "gztar", root_dir=stage.parent, base_dir=name))
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     (dist / (archive.name + ".sha256")).write_text(digest + "  " + archive.name + "\n")
     with tempfile.TemporaryDirectory() as location:
         shutil.unpack_archive(str(archive), location)
-        extracted = Path(location) / name / source.name
+        unpacked = Path(location) / name
+        assert (unpacked / "THIRD_PARTY_NOTICES.md").is_file()
+        assert "Jesse Vincent" in (unpacked / "licenses/superpowers-MIT.txt").read_text()
+        extracted = unpacked / source.name
         extracted.chmod(extracted.stat().st_mode | 0o111)
         assert subprocess.check_output([str(extracted), "--version"], text=True).strip() == expected
         json.loads(subprocess.check_output([str(extracted), "guide", "undo", "--json"], text=True))

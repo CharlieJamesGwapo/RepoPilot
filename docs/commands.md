@@ -8,6 +8,9 @@ shell                     # explicit shell entry point
 shell [--plain-prompt]
 welcome
 guide [topic words...]
+skills list [--pack development|ui-ux]
+skills show <id>
+skills export <id> [--path <existing-project>] [--target portable|codex|claude] [--dry-run]
 scan [path]
 doctor [path]
 explain [path]
@@ -85,3 +88,5 @@ Run `repopilot` with no command, or `repopilot shell`, to launch your configured
 Use `repopilot shell --plain-prompt`, or set `REPOPILOT_PROMPT=off`, to disable the branded prompt. `NO_COLOR` and `TERM=dumb` suppress color. No global rcfile is edited. Shell mode does not support `--json` or `--config`; select a diagnostic/report/provider subcommand instead. This is a CLI inside your existing terminal emulator, and ordinary commands are executed by the real shell. Chat remains separate; plain chat uses saved user configuration in local-only mode.
 
 The two-line prompt is `[RepoPilot] my-project git:(main)` followed by `> `. A detached checkout uses `git:(@a1b2c3d)`; a failed previous command adds `[exit 1]` (with the actual nonzero code). Git queries inspect branch/commit metadata without scanning working-tree changes. Run `exit` to leave the shell session.
+
+Built-in skills are included in v0.2.0 binaries and Homebrew installations. See [skills](skills.md) for output, export, and attribution details.

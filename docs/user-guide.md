@@ -103,3 +103,16 @@ Read [provider setup](providers.md), [privacy](privacy.md), and [adapter boundar
 ## Configure and troubleshoot
 
 `repopilot config init` creates a local template without overwriting an existing file. `repopilot <command> --help` documents the installed interface. See [installation](installation.md), the [command reference](commands.md), and [troubleshooting](troubleshooting.md) for details. `--quiet` reduces optional output, `--verbose` adds detail, and `--json` is available for structured command results where supported. Shell mode and the welcome screen are terminal interfaces rather than JSON reports.
+
+## Browse reusable skills
+
+RepoPilot v0.2.0 includes ten offline skill workflows for development and UI/UX, available in binaries and through Homebrew.
+
+```sh
+repopilot skills list --pack development
+repopilot skills show planning
+repopilot skills export planning --path . --dry-run
+repopilot skills export planning --path .
+```
+
+The default export goes into the project's `.repopilot/skills/` directory with a Markdown workflow, license, and notice. Optional `--target codex` and `--target claude` choose project-local discovery layouts. Export never overwrites an existing destination or starts an agent; it does not change chat or providers. See [the skills guide](skills.md) for pack choices, JSON output, attribution, and filesystem trust boundaries.

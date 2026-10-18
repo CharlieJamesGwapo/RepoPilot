@@ -1,7 +1,7 @@
 #!/bin/sh
 # Install a checksum-verified RepoPilot release into a user-owned directory.
 set -eu
-version=${REPOPILOT_VERSION:-v0.1.0}
+version=${REPOPILOT_VERSION:-v0.2.0}
 install_dir=${REPOPILOT_INSTALL_DIR:-"$HOME/.local/bin"}
 case "$version" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo 'Expected a version tag such as v0.1.0.' >&2; exit 1 ;; esac
 case "$version" in *[!a-zA-Z0-9._+-]*) echo 'Invalid version tag.' >&2; exit 1 ;; esac

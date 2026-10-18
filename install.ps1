@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$')]
-    [string]$Version = 'v0.1.0',
+    [string]$Version = 'v0.2.0',
     [string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'RepoPilot\bin')
 )
 $ErrorActionPreference = 'Stop'

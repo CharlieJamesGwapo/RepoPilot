@@ -17,7 +17,7 @@ brew install charliejamesgwapo/tap/repopilot
 
 The project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap) selects the Apple Silicon or Intel binary. No Rust toolchain is needed. Shell completions and documentation are included; AI tools and models are installed separately.
 
-[Download v0.1.0 binaries](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.1.0) for macOS, x86-64 Windows, and x86-64 Linux GNU. See [installation](docs/installation.md) for reviewed installers, checksums, PATH setup, and updates. Binaries are unsigned; macOS builds are not notarized.
+[Download v0.2.0 binaries](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.2.0) for macOS, x86-64 Windows, and x86-64 Linux GNU. See [installation](docs/installation.md) for reviewed installers, checksums, PATH setup, and updates. Binaries are unsigned; macOS builds are not notarized.
 
 ![RepoPilot welcome screen and Git status in a real shell](docs/screenshots/welcome.jpg)
 
@@ -64,6 +64,18 @@ Plain `repopilot chat` uses saved user configuration in local-only mode. A suppo
 Each AI request is independent: only the typed prompt is sent, with no automatic repository files or conversation history. Additional API and executable integrations use explicit configuration and consent. The supported mechanisms are a small chat-completions HTTP subset, loopback runtimes, and explicitly configured stdin/stdout executables. See the provider guide for compatibility and setup.
 
 RepoPilot is free; external providers may charge for their services. Read [provider setup](docs/providers.md) and [privacy](docs/privacy.md) before connecting one.
+
+## Built-in skills
+
+The current source includes offline development and UI/UX skills you can inspect and export into a project:
+
+```sh
+repopilot skills list
+repopilot skills show debugging
+repopilot skills export debugging --path . --dry-run
+```
+
+Portable export is the default; Codex and Claude project layouts are optional. Exports include licenses, never overwrite an existing skill directory, and launch no agent. Included in v0.2.0 binaries and Homebrew installations. See [skills](docs/skills.md) for all ten workflows and export details.
 
 ## Learn more
 
