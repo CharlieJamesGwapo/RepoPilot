@@ -1,6 +1,6 @@
-# 0.3.0 release candidate review
+# 0.3.0 release review
 
-This candidate is not a published release. The current public release and Homebrew formula remain v0.2.0. Candidate version: `0.3.0-rc.1`.
+RepoPilot v0.3.0 incorporates the reviewed `0.3.0-rc.1` candidate from [PR #1](https://github.com/CharlieJamesGwapo/RepoPilot/pull/1). Older published releases remain unchanged.
 
 ## Confirmed fixes
 
@@ -18,12 +18,12 @@ Three optional, licensed local coding-model presets can be configured explicitly
 
 ## Security operations
 
-The public repository has private vulnerability reporting, dependency alerts/security updates, secret scanning and push protection enabled. The candidate pins workflow actions to verified commits, proposes recurring Cargo/Actions dependency updates, and audits the dependency lockfile against RustSec on pushes/PRs. Scheduled default-branch checks become active after integration.
+The public repository has private vulnerability reporting, dependency alerts/security updates, secret scanning and push protection enabled. The candidate pins workflow actions to verified commits, proposes recurring Cargo/Actions dependency updates, and audits the dependency lockfile against RustSec on pushes/PRs. Scheduled checks are configured on the default branch.
 
 Checksums validate consistency with published checksum files; the project does not yet provide signed/notarized executables or an independently authenticated release signature. Native shells and configured executables retain user-level privileges. Local runtimes may forward requests downstream. Filesystem preflight checks are not a hostile-process sandbox. See [security boundaries](security.md) and [reporting policy](../SECURITY.md).
 
 ## Verification and release gate
 
-Local macOS ARM64 checks: 99 Rust tests, strict Clippy, formatting, native candidate packaging and seven POSIX installer regressions. Candidate CI additionally packages each native runner's binary and exercises Windows installers with PowerShell 7 and Windows PowerShell 5. Consult the current pull request's checks for actual hosted status.
+Local macOS ARM64 checks: 99 Rust tests, strict Clippy, formatting, native candidate packaging and seven POSIX installer regressions. Candidate CI additionally packages each native runner's binary and exercises Windows installers with PowerShell 7 and Windows PowerShell 5. The candidate passed [native CI](https://github.com/CharlieJamesGwapo/RepoPilot/actions/runs/39116817149) and [dependency security](https://github.com/CharlieJamesGwapo/RepoPilot/actions/runs/39116817140); stable publication additionally requires fresh checks and published-download verification.
 
 Before publishing a stable version, require green candidate CI and dependency audit, independent review, accurate release notes and deliberate stable version/installer updates. A release tag triggers publication; no candidate tag was created during this review. Then verify the actual downloads on all four targets, update the Homebrew formula from published checksums, and pass both Mac architectures' Homebrew jobs. Preserve all older release assets.

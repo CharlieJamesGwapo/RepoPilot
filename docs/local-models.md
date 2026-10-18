@@ -1,6 +1,6 @@
 # Optional local coding models
 
-The current development source includes an offline model catalog and explicit local-config setup. These commands do not install models, start a service, access the network, authenticate tools, or change saved user chat configuration. Published v0.2.0 binaries do not include this new feature yet.
+RepoPilot v0.3.0 includes an offline model catalog and explicit local-config setup. These commands do not install models, start a service, access the network, authenticate tools, or change saved user chat configuration. These commands are available in v0.3.0 binaries and Homebrew installations.
 
 ```sh
 repopilot models list

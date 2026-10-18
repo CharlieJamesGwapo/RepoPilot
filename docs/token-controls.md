@@ -1,6 +1,6 @@
-# Response budgets and usage (unreleased candidate)
+# Response budgets and usage
 
-These controls are in the current 0.3.0 release candidate, not published v0.2.0 binaries or Homebrew yet.
+These controls are included in v0.3.0 binaries and Homebrew installations.
 
 ```sh
 repopilot --config ./local-coder.toml ask "Explain this API pattern briefly" --local --max-output-tokens 256 --json

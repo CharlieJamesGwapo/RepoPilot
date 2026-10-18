@@ -17,7 +17,7 @@ brew install charliejamesgwapo/tap/repopilot
 
 The project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap) selects the Apple Silicon or Intel binary. No Rust toolchain is needed. Shell completions and documentation are included; AI tools and models are installed separately.
 
-[Download v0.2.0 binaries](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.2.0) for macOS, x86-64 Windows, and x86-64 Linux GNU. See [installation](docs/installation.md) for reviewed installers, checksums, PATH setup, and updates. Binaries are unsigned; macOS builds are not notarized.
+[Download v0.3.0 binaries](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.3.0) for macOS, x86-64 Windows, and x86-64 Linux GNU. See [installation](docs/installation.md) for reviewed installers, checksums, PATH setup, and updates. Binaries are unsigned; macOS builds are not notarized.
 
 ![RepoPilot welcome screen and Git status in a real shell](docs/screenshots/welcome.jpg)
 
@@ -75,11 +75,11 @@ repopilot skills show debugging
 repopilot skills export debugging --path . --dry-run
 ```
 
-Portable export is the default; Codex and Claude project layouts are optional. Exports include licenses, never overwrite an existing skill directory, and launch no agent. Included in v0.2.0 binaries and Homebrew installations. See [skills](docs/skills.md) for all ten workflows and export details.
+Portable export is the default; Codex and Claude project layouts are optional. Exports include licenses, never overwrite an existing skill directory, and launch no agent. Included in v0.2.0 and later binaries and Homebrew installations. See [skills](docs/skills.md) for all ten workflows and export details.
 
-## Next release candidate
+## Local models, token controls and security
 
-The current source includes optional [local coding-model presets](docs/local-models.md), [response budgets and measured provider usage](docs/token-controls.md), and security hardening. See the [release-readiness review](docs/release-readiness.md). These additions are under release review and are **not in the published v0.2.0/Homebrew binaries yet**. Offline work needs no model; model weights and runtime installation stay explicit.
+RepoPilot v0.3.0 includes optional [local coding-model presets](docs/local-models.md), [response budgets and measured provider usage](docs/token-controls.md), and security hardening. See the [release-readiness review](docs/release-readiness.md). These additions are included in **v0.3.0 binaries and Homebrew installations**. Offline work needs no model; model weights and runtime installation stay explicit.
 
 ## Learn more
 

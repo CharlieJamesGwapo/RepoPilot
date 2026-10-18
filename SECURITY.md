@@ -1,6 +1,6 @@
 # Security policy
 
-RepoPilot 0.2.x is the currently supported release line. Security fixes target the current release; upgrade older installations before checking whether a problem remains. There is no guaranteed response time or commercial security service.
+RepoPilot 0.3.x is the currently supported release line. Security fixes target the current release; upgrade older installations before checking whether a problem remains. There is no guaranteed response time or commercial security service.
 
 Report vulnerabilities privately through [GitHub private vulnerability reporting](https://github.com/CharlieJamesGwapo/RepoPilot/security/advisories/new). Do not include working credentials, sensitive source, or exploit details in public issues. If the private form is unavailable, avoid posting sensitive details publicly and check this policy for an updated reporting route.
 

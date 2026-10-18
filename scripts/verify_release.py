@@ -1,12 +1,14 @@
 """Download public release assets, verify SHA-256, and test real user-local installation."""
 import argparse
 import hashlib
+import http.server
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 import urllib.request
 
@@ -33,6 +35,55 @@ def verified_download(base, name, directory):
     if len(expected) != 64 or actual != expected:
         raise AssertionError("SHA-256 mismatch: " + name)
     return path, actual
+
+
+
+def verify_models_and_tokens(binary, directory, env):
+    models = json.loads(subprocess.check_output([binary, "models", "list", "--json"], env=env, text=True))
+    assert {m["id"] for m in models} == {"light", "balanced", "workstation"}
+    config = directory / "explicit local model.toml"
+    setup = [binary, "models", "setup", "light", "--output", str(config), "--json"]
+    result = json.loads(subprocess.check_output(setup, env=env, text=True))
+    assert not result["network_accessed"] and not result["downloaded"]
+    visible = json.loads(subprocess.check_output([binary, "--config", str(config), "config", "--json"], env=env, text=True))
+    assert visible["providers"]["local-coder"]["model"] == "qwen2.5-coder:1.5b"
+    assert visible["providers"]["local-coder"]["endpoint"] == "http://127.0.0.1:11434/v1"
+    original = config.read_bytes()
+    refused = subprocess.run(setup, env=env, capture_output=True, text=True)
+    assert refused.returncode != 0 and config.read_bytes() == original
+    received = []
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_POST(self):
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            received.append(body)
+            payload = json.dumps({"choices": [{"message": {"content": "OK"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 4, "completion_tokens": 3, "total_tokens": 7}}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+
+    server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    server.timeout = 10
+    port = server.server_address[1]
+    config.write_text(config.read_text().replace("127.0.0.1:11434", "127.0.0.1:" + str(port)))
+    thread = threading.Thread(target=server.handle_request, daemon=True)
+    thread.start()
+    try:
+        answer = json.loads(subprocess.check_output([binary, "--config", str(config), "ask", "release protocol fixture", "--local", "--max-output-tokens", "3", "--json"], env=env, text=True, timeout=20))
+        assert answer["answer"] == "OK" and answer["output_limit"] == 3
+        assert answer["usage"]["completion_tokens"] == 3 and answer["finish_reason"] == "stop"
+    finally:
+        thread.join(timeout=12)
+        server.server_close()
+    assert not thread.is_alive() and len(received) == 1
+    assert received[0]["max_tokens"] == 3
+    assert received[0]["messages"] == [{"role": "user", "content": "release protocol fixture"}]
+    return ["offline local-model catalog and explicit loopback config setup; overwrite refused", "response-budget request and provider usage metadata verified against a local protocol fixture"]
 
 
 def main():
@@ -92,6 +143,7 @@ def main():
             refused = subprocess.run(command_args, env=env, capture_output=True, text=True)
             assert refused.returncode != 0 and "already exists" in refused.stderr
         checks.append("ten built-in skills; all three project export targets, dry-run, attribution and overwrite refusal work")
+        checks.extend(verify_models_and_tokens(binary, directory, env))
         env["SHELL"] = "/bin/sh"
         script = "echo REPOPILOT_INSTALL_SHELL_OK\r\nexit /b 0\r\n" if windows else "printf 'REPOPILOT_INSTALL_SHELL_OK\\n'\nexit 0\n"
         result = subprocess.run([binary, "shell", "--plain-prompt"], input=script, capture_output=True, text=True, env=env, check=True)
