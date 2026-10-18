@@ -13,6 +13,7 @@ jobs:
         with:
           components: rustfmt, clippy
       - run: cargo fmt --all --check
+      - run: python3 scripts/test_installers.py
       - run: cargo clippy --all-targets --all-features --locked -- -D warnings
   test:
     strategy:

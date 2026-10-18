@@ -6,3 +6,5 @@
 !.env.example
 repopilot.toml
 .DS_Store
+__pycache__/
+*.py[cod]

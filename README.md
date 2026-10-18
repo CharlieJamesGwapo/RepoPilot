@@ -6,7 +6,20 @@ RepoPilot's deterministic engine is independent of its optional provider adapter
 
 Start with the [user guide](docs/user-guide.md), [installation instructions](docs/installation.md), or [command reference](docs/commands.md).
 
-## Build and run
+## Install
+
+Get [RepoPilot v0.1.0](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.1.0) for Apple Silicon/Intel macOS, x86-64 Linux, or x86-64 Windows. Download the installer, review it, then run it. See [installation](docs/installation.md) for checksum verification, Windows instructions, custom destinations, and PATH setup.
+
+```sh
+curl --fail --location --output install.sh https://github.com/CharlieJamesGwapo/RepoPilot/releases/download/v0.1.0/install.sh
+less install.sh
+sh install.sh
+"$HOME/.local/bin/repopilot" --version
+```
+
+Installers verify archive checksums and executable versions without changing PATH. Binaries are unsigned and macOS builds are not notarized. Source installation remains available below.
+
+## Build from source
 
 Install a current stable Rust toolchain, then run from this directory:
 
@@ -19,7 +32,7 @@ cargo build --release --locked
 ./target/release/repopilot report . --format markdown
 ```
 
-On Windows, use `target\release\repopilot.exe`. To install from the checked-out source, run `cargo install --path . --locked`. This source distribution does not assume a published package or public repository address.
+On Windows, use `target\release\repopilot.exe`. To install from the checked-out source, run `cargo install --path . --locked`. Source and release assets are hosted in [CharlieJamesGwapo/RepoPilot](https://github.com/CharlieJamesGwapo/RepoPilot).
 
 Run `repopilot` or `repopilot shell` to open your real shell in the current folder. Interactive zsh/bash receive a session-only RepoPilot prompt with the folder, Git branch, and nonzero exit status; normal shell configuration is sourced. Other shells retain their native prompt. Use `repopilot shell --plain-prompt` or set `REPOPILOT_PROMPT=off` to keep your own prompt. Chat remains a separate command.
 
@@ -85,6 +98,6 @@ Current local test evidence: [latest verification](docs/verification-latest.md).
 
 ## Scope of v0.1.0
 
-This is a source release with testable core functionality and deliberately small provider protocols. Streaming, tool execution by models, automatic repository context transfer, OS credential-store integration, authentication flows for vendor CLIs, and arbitrary third-party plugin loading are not implemented. Provider connectivity is only verified when a real test succeeds; automated tests use mocks and local fixtures.
+This release provides local core functionality and deliberately small provider protocols. Streaming, tool execution by models, automatic repository context transfer, OS credential-store integration, authentication flows for vendor CLIs, and arbitrary third-party plugin loading are not implemented. Provider connectivity is only verified when a real test succeeds; automated tests use mocks and local fixtures.
 
 Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Released under the [MIT license](LICENSE). See the [release checklist](docs/releasing.md) before publishing.

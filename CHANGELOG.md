@@ -1,19 +1,12 @@
 # Changelog
 
-## Unreleased updates
+## 0.1.0 — 2026-10-18
 
-- Interactive Zsh and Bash sessions gain a session-local RepoPilot prompt with the current folder, Git branch or detached commit, and failed-command status. User startup files and aliases are retained. `shell --plain-prompt` and `REPOPILOT_PROMPT=off` keep the original prompt.
-- Added a colored ASCII welcome logo, boxed quick-start commands, seven curated offline workflow guides, clearer CLI help, and a complete user guide with output examples and troubleshooting.
+- Real shell workspace with a branded welcome screen and session-only zsh/bash prompt showing the folder, Git branch or detached commit, and failed command status. Native prompt opt-out and normal shell configuration remain available.
+- Local project discovery, environment diagnostics, deterministic explanations, inspection-only quality suggestions, and terminal/JSON/Markdown reports.
+- Curated offline workflow guides for project setup, branches, undo, status, stash, tools, and checks; suggestions never execute automatically.
+- Separate interactive chat with saved local-only configuration, provider selection, local diagnostic navigation, and explicit configuration for external integrations.
+- Provider adapters for the supported chat-completions HTTP subset, loopback runtimes, and explicitly configured stdin/stdout executables; conservative capability reporting, consent checks, and environment credential references.
+- Mock/local-fixture tests and cross-platform CI/release automation, with SHA-256-verified installers for macOS, Windows, and Linux binary archives.
 
-- Bare `repopilot` and `repopilot shell` open a real shell with inherited terminal support. Local AI chat remains a separate command. Shell mode preserves environment, working directory, exit status and Unix signals and bypasses provider configuration.
-
-- Plain `repopilot chat` discovers saved user configuration, ignores repository provider configs, and enforces sticky local-only mode. First-run user setup saves the active provider after confirmation. Explicit config behavior is preserved.
-
-## 0.1.0 — Unreleased
-
-- Initial local project discovery, environment diagnostics, deterministic summaries, inspection-only quality suggestions, and terminal/JSON/Markdown reports.
-- Explicit local configuration and interactive terminal navigation.
-- Provider adapter boundary for compatible APIs, loopback runtimes, and explicitly configured executables.
-- Consent checks, environment credential references, conservative capabilities, and mock-based verification.
-
-This entry describes the initial source release; it does not claim a package, binary, or public repository has been published.
+Provider API usage may carry separate charges. Streaming, automatic repository context upload, OS credential-store integration, and arbitrary plugin loading are not implemented.

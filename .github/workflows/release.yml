@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             binary: repopilot
           - os: windows-latest
@@ -41,37 +41,16 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --all-targets --all-features --locked -- -D warnings
       - run: cargo test --all-targets --all-features --locked
+      - name: Offline POSIX installer regression tests
+        run: python scripts/test_installers.py
       - run: cargo build --release --locked --target ${{ matrix.target }}
       - name: Verify release binary and package
         shell: bash
-        env:
-          RELEASE_TARGET: ${{ matrix.target }}
-          RELEASE_BINARY: ${{ matrix.binary }}
-        run: |
-          python - <<'PY'
-          import hashlib, json, os, pathlib, shutil, subprocess, tempfile
-          target, binary = os.environ['RELEASE_TARGET'], os.environ['RELEASE_BINARY']
-          source = pathlib.Path('target') / target / 'release' / binary
-          subprocess.run([str(source.resolve()), '--version'], check=True)
-          result = subprocess.run([str(source.resolve()), 'scan', '.', '--json'], check=True, capture_output=True, text=True)
-          json.loads(result.stdout)
-          dist = pathlib.Path('dist'); dist.mkdir()
-          name = 'repopilot-' + os.environ['GITHUB_REF_NAME'] + '-' + target
-          stage = pathlib.Path(tempfile.mkdtemp()) / name; stage.mkdir()
-          shutil.copy2(source, stage / binary)
-          for file in ['README.md', 'LICENSE', 'CHANGELOG.md']:
-              shutil.copy2(file, stage / file)
-          shutil.copytree('docs', stage / 'docs')
-          archive = pathlib.Path(shutil.make_archive(str(dist / name), 'zip' if binary.endswith('.exe') else 'gztar', root_dir=stage.parent, base_dir=name))
-          digest = hashlib.sha256(archive.read_bytes()).hexdigest()
-          (dist / (archive.name + '.sha256')).write_text(digest + '  ' + archive.name + '\n')
-          with tempfile.TemporaryDirectory() as location:
-              shutil.unpack_archive(str(archive), location)
-              extracted = pathlib.Path(location) / name / binary
-              extracted.chmod(extracted.stat().st_mode | 0o111)
-              subprocess.run([str(extracted), '--version'], check=True)
-          assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest
-          PY
+        run: python scripts/package_release.py --version "$GITHUB_REF_NAME" --target "${{ matrix.target }}" --binary "target/${{ matrix.target }}/release/${{ matrix.binary }}"
+      - name: Windows installer regression tests
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/test_windows_installer.ps1 -PackageDir dist -Version $env:GITHUB_REF_NAME
       - uses: actions/upload-artifact@v4
         with:
           name: repopilot-${{ matrix.target }}
@@ -83,16 +62,46 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           pattern: repopilot-*
           merge-multiple: true
           path: dist
-      - name: Verify checksums
-        working-directory: dist
-        run: sha256sum --check *.sha256
+      - name: Include reviewed installers and checksums
+        run: |
+          cp install.sh install.ps1 dist/
+          cd dist
+          sha256sum install.sh > install.sh.sha256
+          sha256sum install.ps1 > install.ps1.sha256
+          sha256sum --check *.sha256
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --title "RepoPilot $GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --title "RepoPilot $GITHUB_REF_NAME" --notes-file "docs/releases/$GITHUB_REF_NAME.md"
+  verify-downloads:
+    needs: publish
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and install published assets
+        shell: bash
+        run: python scripts/verify_release.py --version "$GITHUB_REF_NAME" --target "${{ matrix.target }}" --report "release-verification-${{ matrix.target }}.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-verification-${{ matrix.target }}
+          path: release-verification-${{ matrix.target }}.json
+          if-no-files-found: error

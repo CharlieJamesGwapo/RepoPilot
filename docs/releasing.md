@@ -1,14 +1,15 @@
-# Release checklist
+# Releasing RepoPilot
 
-This source tree includes release automation; no repository or package has been published by generating it.
+Repository: [CharlieJamesGwapo/RepoPilot](https://github.com/CharlieJamesGwapo/RepoPilot). Release: [v0.1.0](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.1.0).
 
-1. Establish the public repository, maintainers, private security reporting channel, and community contact. Confirm ownership, MIT licensing, and dependency licenses.
-2. Review the README and changelog against actual behavior. Replace “Unreleased” with the release date. Confirm `Cargo.toml` version and `Cargo.lock` are committed.
-3. Run formatting, strict Clippy, and all tests. Exercise help, core commands without configuration, local-only rejection, mock provider failures, chat navigation, and permission prompts.
-4. Run CI on Linux, macOS, and Windows. The workflow files are templates until they have succeeded on the actual hosted repository. Review third-party action revisions and pin them to reviewed immutable commits for your supply-chain policy before launch.
-5. Tag the reviewed commit `v0.1.0` and push the tag only when ready to publish. **A matching `v*` tag triggers public GitHub Release creation automatically.** Protect tag creation and restrict workflow modification.
-6. Release automation checks the tag against package metadata, tests and builds each native platform, runs binary and JSON smoke checks, packages README/license/changelog, extracts and runs the packaged binary, and verifies SHA-256 checksums before publication.
-7. Download each published archive, check its `.sha256`, and test on its target OS. Document tested minimum OS versions. These archives are unsigned; do not claim signing, notarization, reproducibility, universal Linux ABI compatibility, or package-manager availability.
-8. Publish registry packages or package-manager formulas only after separate review and explicit maintainer action. Do not invent download URLs or installation commands before hosting exists.
+1. Review the version, changelog, README, installer defaults, and documentation against actual behavior. Commit `Cargo.lock`; confirm dependency licenses and MIT licensing. Establish private security reporting and a community contact.
+2. Run formatting, strict Clippy, and all tests. Exercise core diagnostics offline, permission failures, local-only restrictions, saved-local chat, real-shell behavior, and installer failure paths with fixtures.
+3. Run hosted CI on Linux, macOS, and Windows. Treat workflow execution as verified only after its actual jobs succeed; a checked-in workflow is not evidence of a passing run.
+4. Create the reviewed version tag and push it only when ready to publish. **A matching `v*` tag triggers GitHub Release creation automatically.** Protect tag creation and restrict workflow changes.
+5. The release workflow validates the package/tag match, builds the four target archives, smoke-tests packaged executables, and verifies checksums. Distribute `install.sh` and `install.ps1` as release assets alongside archives and `.sha256` files.
+6. Download the actual published assets, verify each checksum, and test installation and binary execution on its supported target. Retain job and test evidence before claiming a platform has passed. Check installer asset URLs, version output, PATH guidance, and upgrade behavior.
+7. Review release notes and installation documentation. Binaries are unsigned; macOS builds are not notarized. Do not imply signing, universal compatibility, reproducibility, Homebrew distribution, or crates.io publication.
 
-Targets: x86-64 Linux GNU, x86-64 Windows MSVC, Intel macOS, and ARM64 macOS. Linux builds use the hosted runner's glibc baseline; older distributions may require building from source. Runner image availability and GitHub permission policies must be verified when the workflow first runs.
+Targets: `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu`, and `x86_64-pc-windows-msvc`. Linux builds use Ubuntu 22.04. Unsupported architectures or older runtime libraries may require building from source.
+
+Installers default to version `v0.1.0`. The shell installer supports `REPOPILOT_VERSION` and `REPOPILOT_INSTALL_DIR`; PowerShell supports `-Version` and `-InstallDir`. Both verify downloads before extraction/version validation and atomic replacement, and print PATH instructions without editing user configuration. Update installer defaults deliberately for the next release.
