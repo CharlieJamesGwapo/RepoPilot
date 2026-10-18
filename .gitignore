@@ -1,0 +1,8 @@
+/target/
+/dist/
+*.log
+.env
+.env.*
+!.env.example
+repopilot.toml
+.DS_Store

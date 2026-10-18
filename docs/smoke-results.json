@@ -1,0 +1,58 @@
+[
+  {
+    "command": "repopilot --version",
+    "exit": 0
+  },
+  {
+    "command": "repopilot scan . --json",
+    "exit": 0
+  },
+  {
+    "command": "repopilot doctor . --json",
+    "exit": 0
+  },
+  {
+    "command": "repopilot explain . --json",
+    "exit": 0
+  },
+  {
+    "command": "repopilot check . --json",
+    "exit": 0
+  },
+  {
+    "command": "repopilot report . --format markdown",
+    "exit": 0
+  },
+  {
+    "command": "repopilot rules --json",
+    "exit": 0
+  },
+  {
+    "command": "repopilot completions bash",
+    "exit": 0
+  },
+  {
+    "command": "repopilot config init",
+    "exit": 0
+  },
+  {
+    "command": "repopilot config --json",
+    "exit": 0
+  },
+  {
+    "command": "repopilot providers list",
+    "exit": 0
+  },
+  {
+    "command": "repopilot chat --local",
+    "exit": 0
+  },
+  {
+    "command": "repopilot doctor <malformed fixture> --json",
+    "exit": 1
+  },
+  {
+    "command": "repopilot scan <missing fixture>",
+    "exit": 2
+  }
+]

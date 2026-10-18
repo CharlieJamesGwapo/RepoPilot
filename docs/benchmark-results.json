@@ -1,0 +1,44 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "version": "repopilot 0.1.0",
+  "binary_sha256": "dc4837a31e064ef88eebe1d5038674d5218d1dcad14366486a101e4b9d902647",
+  "method": "One warmup; sequential subprocess wall-clock samples; warm OS cache; output captured; process startup included; RSS from one separate macOS time -l invocation when available",
+  "measurements": {
+    "version": {
+      "runs": 20,
+      "median_ms": 2.427,
+      "min_ms": 2.012,
+      "max_ms": 4.896,
+      "peak_rss_bytes_single_run": 2490368
+    },
+    "self_inventory": {
+      "runs": 20,
+      "median_ms": 2.175,
+      "min_ms": 2.034,
+      "max_ms": 2.356,
+      "peak_rss_bytes_single_run": 4079616
+    },
+    "cargo_metadata_no_deps_offline": {
+      "runs": 20,
+      "median_ms": 10.683,
+      "min_ms": 10.505,
+      "max_ms": 11.066,
+      "peak_rss_bytes_single_run": 17891328
+    },
+    "synthetic_inventory": {
+      "runs": 20,
+      "median_ms": 11.147,
+      "min_ms": 10.946,
+      "max_ms": 11.397,
+      "peak_rss_bytes_single_run": 7274496
+    }
+  },
+  "cargo_version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+  "fixture": {
+    "source_files": 10000,
+    "excluded_manifests": 600,
+    "accuracy_assertions": "passed",
+    "incomplete": false
+  }
+}
