@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Reproducible warm-cache CLI measurements. No repository or network changes."""
+import utils.transport
+import utils.session
 import argparse
 import hashlib
 import json
