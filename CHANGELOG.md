@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add macOS installation through the project's third-party Homebrew tap, with Apple Silicon/Intel binary selection, shell completions, and installed documentation. The published v0.1.0 binaries and release history remain unchanged.
+- Expand installation guidance for Homebrew updates, removal, and existing binaries on PATH.
+
 ## 0.1.0 — 2026-10-18
 
 - Real shell workspace with a branded welcome screen and session-only zsh/bash prompt showing the folder, Git branch or detached commit, and failed command status. Native prompt opt-out and normal shell configuration remain available.

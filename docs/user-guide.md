@@ -2,6 +2,10 @@
 
 RepoPilot gives you a familiar shell workspace, offline project diagnostics, curated workflow guidance, and optional AI chat. It runs in your existing terminal application. It is a CLI, not a terminal emulator: your terminal continues to provide windows, tabs, fonts, rendering, and keyboard handling.
 
+## Install on macOS
+
+With Homebrew installed, run `brew install charliejamesgwapo/tap/repopilot`. The project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap) installs the matching Apple Silicon or Intel binary, shell completions, and documentation without requiring Rust. AI tools and models remain separately installed and authenticated. See [installation](installation.md) for updates, Windows/Linux options, and checking whether an older executable shadows Homebrew on PATH.
+
 ## Open your workspace
 
 From the folder where you work, run:

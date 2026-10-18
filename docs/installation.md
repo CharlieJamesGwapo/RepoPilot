@@ -2,7 +2,41 @@
 
 Download RepoPilot from the [v0.1.0 release](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.1.0). Supported binary targets are Apple Silicon macOS, Intel macOS, x86-64 Linux GNU, and x86-64 Windows. Linux binaries are built on Ubuntu 22.04; older system libraries or other architectures may require a source build.
 
-## macOS and Linux
+## macOS: Homebrew (recommended)
+
+If Homebrew is already installed, run:
+
+```sh
+brew install charliejamesgwapo/tap/repopilot
+```
+
+This is the project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap), not a Homebrew core formula. The formula selects the published v0.1.0 Apple Silicon or Intel binary and verifies its SHA-256 checksum. No Rust toolchain is required. Bash, zsh, and fish completion definitions and project documentation are installed through Homebrew; documents are available under `$(brew --prefix)/share/doc/repopilot`. Use your shell's normal completion setup if necessary.
+
+To update:
+
+```sh
+brew update
+brew upgrade charliejamesgwapo/tap/repopilot
+```
+
+To remove the Homebrew installation:
+
+```sh
+brew uninstall repopilot
+```
+
+If an older installation appears first on PATH, inspect all matches:
+
+```sh
+type -a repopilot
+"$(brew --prefix)/bin/repopilot" --version
+```
+
+An existing `$HOME/.local/bin/repopilot` can shadow Homebrew's executable. Choose the intended PATH order or manage the older installation yourself; Homebrew does not remove a separately installed binary. Installing or reinstalling RepoPilot does not install Claude, Codex, other AI CLIs, authentication, or models.
+
+The tap's CI is intended to validate Apple Silicon and Intel macOS separately. A workflow definition alone is not a completed test result. [This guide on main](https://github.com/CharlieJamesGwapo/RepoPilot/blob/main/docs/installation.md) contains current installation instructions; the original v0.1.0 release assets remain unchanged.
+
+## macOS and Linux: reviewed installer
 
 Download the installer to a file, review it, then run it:
 
@@ -70,6 +104,6 @@ mkdir -p "$HOME/.local/bin"
 install -m 755 target/release/repopilot "$HOME/.local/bin/repopilot"
 ```
 
-Building downloads dependencies unless cached. RepoPilot's deterministic core itself works offline without a provider, account, or configuration. There is no claimed Homebrew formula or crates.io package.
+Building downloads dependencies unless cached. RepoPilot's deterministic core itself works offline without a provider, account, or configuration. Homebrew uses the separate project tap described above; no crates.io package is claimed.
 
 Run `repopilot` for the real shell workspace, `repopilot welcome` for a preview, or `repopilot scan .` for diagnostics. RepoPilot uses your existing terminal emulator. The branded zsh/bash prompt is session-only; use `repopilot shell --plain-prompt` or `REPOPILOT_PROMPT=off` to opt out. Optional AI setup is separate: see [providers](providers.md) and [privacy](privacy.md).

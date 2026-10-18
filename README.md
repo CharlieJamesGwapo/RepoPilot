@@ -8,6 +8,14 @@ Start with the [user guide](docs/user-guide.md), [installation instructions](doc
 
 ## Install
 
+On macOS, install the published binary with Homebrew:
+
+```sh
+brew install charliejamesgwapo/tap/repopilot
+```
+
+This uses the project's [third-party tap](https://github.com/CharlieJamesGwapo/homebrew-tap), selects Apple Silicon or Intel automatically, and needs no Rust toolchain. It installs shell completions and documentation, but no AI tools or models. See the [current installation guide](https://github.com/CharlieJamesGwapo/RepoPilot/blob/main/docs/installation.md) for updates, troubleshooting, and other platforms.
+
 Get [RepoPilot v0.1.0](https://github.com/CharlieJamesGwapo/RepoPilot/releases/tag/v0.1.0) for Apple Silicon/Intel macOS, x86-64 Linux, or x86-64 Windows. Download the installer, review it, then run it. See [installation](docs/installation.md) for checksum verification, Windows instructions, custom destinations, and PATH setup.
 
 ```sh
