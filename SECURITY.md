@@ -1,7 +1,9 @@
 # Security policy
 
-Version 0.1.x is the initial supported development line. There is no published security response service or guaranteed response time in this source distribution.
+RepoPilot 0.2.x is the currently supported release line. Security fixes target the current release; upgrade older installations before checking whether a problem remains. There is no guaranteed response time or commercial security service.
 
-Do not publish working credentials or a sensitive exploit in a public issue. After the project is hosted, use the repository's private vulnerability reporting channel if enabled, or the maintainer's published security contact. A maintainer must configure and document that channel before public launch; this file deliberately invents no email address.
+Report vulnerabilities privately through [GitHub private vulnerability reporting](https://github.com/CharlieJamesGwapo/RepoPilot/security/advisories/new). Do not include working credentials, sensitive source, or exploit details in public issues. If the private form is unavailable, avoid posting sensitive details publicly and check this policy for an updated reporting route.
 
-Provide the affected version, environment, a minimal safe reproduction, impact, and suggested mitigation. Remove keys and private source. See [the security model](docs/security.md) for documented execution and privacy boundaries.
+Include the affected version, environment, a minimal safe reproduction, expected and actual behavior, impact, and any proposed mitigation. Redact keys and private data. Public issues are appropriate for ordinary bugs that do not expose a vulnerability or sensitive information.
+
+See [the security model](docs/security.md) for inspection, native shell execution, optional provider, and skill-export boundaries. Download checksums detect corruption against published values; release binaries are unsigned and macOS binaries are not notarized.

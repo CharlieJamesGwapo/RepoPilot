@@ -30,8 +30,11 @@ pub fn run(
     explicit: bool,
     local: bool,
     user_config: bool,
+    mut max_output_tokens: Option<u32>,
 ) -> Result<()> {
     let trusted = explicit || user_config;
+    let mut last_usage: Option<providers::Usage> = None;
+    let mut request_count = 0u64;
     let mut local = local || user_config;
     output::emit(
         "RepoPilot chat. /help for commands. No provider required; no files are sent.\nEach prompt is independent; no conversation history is transferred.",
@@ -46,7 +49,28 @@ pub fn run(
         let result: Result<()> = (|| match cmd {
             "/exit" | "/quit" => Ok(()),
             "/help" => output::emit(
-                "/providers /connect /use <name> /models /status /local /disconnect /scan [path] /doctor [path] /explain [path] /exit\n/connect guides setup; /use only selects a provider, without testing or authenticating. /local rejects remote and process providers. Prompts require per-request consent for remote or process execution.",
+                "/providers /connect /use <name> /models /status /budget [1..32768|off] /usage /local /disconnect /scan [path] /doctor [path] /explain [path] /exit\n/connect guides setup; /use only selects a provider, without testing or authenticating. /local rejects remote and process providers. Prompts require per-request consent for remote or process execution.",
+            ),
+            "/budget" => {
+                if arg.is_empty() {
+                    return output::json(
+                        &serde_json::json!({"max_output_tokens":max_output_tokens,"enforcement":"requested from compatible HTTP provider; not a billing guarantee"}),
+                    );
+                }
+                if arg == "off" {
+                    max_output_tokens = None;
+                } else {
+                    let limit = arg
+                        .parse::<u32>()
+                        .ok()
+                        .filter(|v| (1..=32768).contains(v))
+                        .ok_or_else(|| anyhow::anyhow!("Use /budget 1..32768 or /budget off"))?;
+                    max_output_tokens = Some(limit);
+                }
+                output::emit("Session response budget updated; saved configuration unchanged.")
+            }
+            "/usage" => output::json(
+                &serde_json::json!({"successful_requests":request_count,"last_usage":last_usage,"source":"provider-reported only; null means unavailable; no savings estimate"}),
             ),
             "/providers" => output::json(&providers::list(&c)),
             "/status" => output::json(
@@ -74,7 +98,7 @@ pub fn run(
                     anyhow::bail!("Unknown provider; /providers lists configured names")
                 }
             }
-            "/connect" => connect(&mut c, path, trusted, local, user_config),
+            "/connect" => connect(&mut c, path, trusted, local, user_config, max_output_tokens),
             "/scan" | "/doctor" | "/explain" => {
                 let r = project::scan(
                     Path::new(if arg.is_empty() { "." } else { arg }),
@@ -113,7 +137,17 @@ pub fn run(
                     ),
                 )?;
                 let (_, p) = providers::selected(&c, &o, trusted)?;
-                output::emit(&providers::adapter(p).generate(&input)?)
+                let generation =
+                    providers::adapter(p).generate_with_limit(&input, max_output_tokens)?;
+                last_usage = generation.usage;
+                request_count = request_count.saturating_add(1);
+                output::emit(&generation.text)?;
+                if generation.finish_reason.as_deref() == Some("length") {
+                    output::emit(
+                        "[Response stopped at the provider's token limit; use /budget to adjust.]",
+                    )?;
+                }
+                Ok(())
             }
         })();
         if cmd == "/exit" || cmd == "/quit" {
@@ -161,6 +195,7 @@ fn connect(
     trusted: bool,
     local: bool,
     user_config: bool,
+    max_output_tokens: Option<u32>,
 ) -> Result<()> {
     output::emit(
         "Types: api (compatible HTTPS service), local (literal loopback compatible service), process (installed executable; can access your account's files/network).\nAuthentication: API none or bearer token via a named environment variable; process tool manages its own login. No credentials are entered or stored here.",
@@ -236,7 +271,13 @@ fn connect(
             "fixed probe: Reply with OK.; no files or history",
         )?;
         let (_, provider) = providers::selected(c, &options, trusted)?;
-        let _ = providers::adapter(provider).generate("Reply with OK.")?;
+        let result = providers::adapter(provider)
+            .generate_with_limit("Reply with OK.", max_output_tokens)?;
+        if result.finish_reason.as_deref() == Some("length") {
+            return output::emit(
+                "Provider responded, but the probe reached the token limit; text generation remains incomplete. Increase /budget if needed.",
+            );
+        }
         output::emit("Connectivity and text generation succeeded for this configured model.")?;
     }
     Ok(())

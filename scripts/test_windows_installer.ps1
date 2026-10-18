@@ -2,7 +2,8 @@ param([Parameter(Mandatory=$true)][string]$PackageDir, [string]$Version='v0.2.0'
 $ErrorActionPreference='Stop'
 $packageSource = (Resolve-Path $PackageDir).Path
 function Invoke-WebRequest {
-    param([string]$Uri, [string]$OutFile, [switch]$UseBasicParsing)
+    param([string]$Uri, [string]$OutFile, [switch]$UseBasicParsing, [int]$TimeoutSec)
+    if ($TimeoutSec -ne 180) { throw "Installer request must use a bounded 180-second timeout." }
     $filename = ([Uri]$Uri).Segments[-1]
     Copy-Item -LiteralPath (Join-Path $fixtureDir $filename) -Destination $OutFile
 }

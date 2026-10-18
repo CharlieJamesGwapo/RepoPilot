@@ -63,4 +63,39 @@ mod unix {
             "prompt data must not be interpolated into shell source: {out}"
         );
     }
+    #[test]
+    fn bash_scalar_hooks_accept_trailing_semicolons_and_comments() {
+        if !available("/bin/bash") {
+            return;
+        }
+        for hook in [
+            "printf HOOK:%s \"$?\";",
+            "printf HOOK:%s \"$?\" # user comment",
+        ] {
+            let script = format!(
+                "PROMPT_COMMAND='{hook}'; source '{}'; false; eval \"$PROMPT_COMMAND\"; printf '\\n%s\\n' \"$PS1\"",
+                concat!(env!("CARGO_MANIFEST_DIR"), "/src/shell/prompt.bash")
+            );
+            let out = Command::new("/bin/bash")
+                .args(["--noprofile", "--norc", "-c", &script])
+                .env("NO_COLOR", "1")
+                .output()
+                .unwrap();
+            assert!(
+                out.status.success(),
+                "{}",
+                String::from_utf8_lossy(&out.stderr)
+            );
+            assert!(
+                out.stderr.is_empty(),
+                "{}",
+                String::from_utf8_lossy(&out.stderr)
+            );
+            let text = String::from_utf8(out.stdout).unwrap();
+            assert!(
+                text.contains("HOOK:1") && text.contains("[RepoPilot]"),
+                "{text}"
+            );
+        }
+    }
 }

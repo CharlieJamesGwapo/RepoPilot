@@ -116,3 +116,7 @@ repopilot skills export planning --path .
 ```
 
 The default export goes into the project's `.repopilot/skills/` directory with a Markdown workflow, license, and notice. Optional `--target codex` and `--target claude` choose project-local discovery layouts. Export never overwrites an existing destination or starts an agent; it does not change chat or providers. See [the skills guide](skills.md) for pack choices, JSON output, attribution, and filesystem trust boundaries.
+
+## Candidate: optional models and response budgets
+
+See [local model setup](local-models.md) for licensed open-weight models that can assist frontend, backend and DevOps work, and [token controls](token-controls.md) for optional completion limits and provider usage reporting. These source additions are not yet in v0.2.0/Homebrew. Setup performs no downloads and preserves existing saved configuration.

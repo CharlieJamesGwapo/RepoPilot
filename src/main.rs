@@ -2,6 +2,7 @@ mod chat;
 mod cli;
 mod config;
 mod guides;
+mod local_models;
 mod output;
 mod project;
 mod providers;
@@ -12,6 +13,10 @@ use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
 use cli::{Cli, Cmd, ConfigAction, Format, ProviderAction};
 fn execute(cli: Cli) -> Result<i32> {
+    if let Some(Cmd::Models { ref action }) = cli.command {
+        local_models::run(action, cli.json, cli.quiet)?;
+        return Ok(0);
+    }
     if let Some(Cmd::Skills { ref action }) = cli.command {
         skills::run(action, cli.json, cli.quiet)?;
         return Ok(0);
@@ -173,12 +178,16 @@ fn execute(cli: Cli) -> Result<i32> {
                 }
             }
             ProviderAction::Models { options } => {
+                if options.max_output_tokens.is_some() {
+                    bail!("--max-output-tokens applies to generation, not model discovery");
+                }
                 let (_, p) = providers::selected(&c, &options, explicit)?;
                 output::json(&providers::adapter(p).models()?)?
             }
             ProviderAction::Test { options } => {
                 let (name, p) = providers::selected(&c, &options, explicit)?;
-                let _ = providers::adapter(p).generate("Reply with OK.")?;
+                let _ = providers::adapter(p)
+                    .generate_with_limit("Reply with OK.", options.max_output_tokens)?;
                 output::json(
                     &serde_json::json!({"provider":name,"connectivity":"success","text_generation":"success","model":p.model}),
                 )?
@@ -191,18 +200,36 @@ fn execute(cli: Cli) -> Result<i32> {
                     "RepoPilot: selected provider {name}; typed prompt only; no files or history"
                 );
             }
-            let answer = providers::adapter(p).generate(&prompt)?;
+            let generation =
+                providers::adapter(p).generate_with_limit(&prompt, options.max_output_tokens)?;
+            let answer = &generation.text;
+            if cli.verbose {
+                eprintln!(
+                    "RepoPilot usage (provider-reported): {}",
+                    serde_json::to_string(&generation.usage)?
+                );
+            }
             if cli.json {
-                output::json(&serde_json::json!({"provider":name,"answer":answer}))?
+                output::json(
+                    &serde_json::json!({"provider":name,"answer":answer,"usage":generation.usage,"finish_reason":generation.finish_reason,"output_limit":options.max_output_tokens}),
+                )?
             } else if !cli.quiet {
-                output::emit(&answer)?
+                output::emit(answer)?;
+                if generation.finish_reason.as_deref() == Some("length") {
+                    eprintln!(
+                        "RepoPilot: response reached the provider's token limit; adjust --max-output-tokens if needed"
+                    );
+                }
             }
         }
-        Cmd::Chat { local } => {
+        Cmd::Chat {
+            local,
+            max_output_tokens,
+        } => {
             if cli.json || cli.quiet {
                 bail!("chat requires interactive text output; omit --json and --quiet")
             };
-            chat::run(c, &path, explicit, local, user_chat)?
+            chat::run(c, &path, explicit, local, user_chat, max_output_tokens)?
         }
         _ => unreachable!("project commands handled above"),
     }
