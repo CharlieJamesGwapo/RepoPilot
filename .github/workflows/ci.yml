@@ -2,14 +2,17 @@ name: CI
 on:
   push:
   pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           components: rustfmt, clippy
       - run: cargo fmt --all --check
@@ -22,9 +25,34 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
       - run: cargo test --all-targets --all-features --locked
       - run: cargo build --release --locked
+      - name: Package and verify native candidate
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          import json, os, subprocess
+          metadata = json.loads(subprocess.check_output(['cargo', 'metadata', '--no-deps', '--format-version', '1']))
+          version = next(p['version'] for p in metadata['packages'] if p['name'] == 'repopilot')
+          host = next(line.split(': ', 1)[1] for line in subprocess.check_output(['rustc', '-vV'], text=True).splitlines() if line.startswith('host: '))
+          binary = 'target/release/repopilot' + ('.exe' if os.name == 'nt' else '')
+          subprocess.run(['python', 'scripts/package_release.py', '--version', 'v' + version, '--target', host, '--binary', binary], check=True)
+          PYTHON
+      - name: Windows candidate installer regression tests
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $metadata = cargo metadata --no-deps --format-version 1 | ConvertFrom-Json
+          $version = 'v' + ($metadata.packages | Where-Object name -eq 'repopilot').version
+          ./scripts/test_windows_installer.ps1 -PackageDir dist -Version $version
+      - name: Windows PowerShell 5 candidate installer regression tests
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $metadata = cargo metadata --no-deps --format-version 1 | ConvertFrom-Json
+          $version = 'v' + ($metadata.packages | Where-Object name -eq 'repopilot').version
+          ./scripts/test_windows_installer.ps1 -PackageDir dist -Version $version
       - run: cargo run --release --locked -- --version
       - run: cargo run --release --locked -- scan . --json

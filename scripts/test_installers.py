@@ -80,6 +80,37 @@ class InstallerTests(unittest.TestCase):
         self.assertIn("version did not match", result.stderr)
         self.assertEqual(destination.read_bytes(), b"old installation")
 
+    def download_timeout(self, suffix):
+        destination = self.existing_binary()
+        curl = self.tools / "curl"
+        curl.write_text("""#!/usr/bin/env python3
+import os,pathlib,shutil,sys
+args=sys.argv[1:]
+url=next(x for x in args if x.startswith('https://'))
+if url.endswith(os.environ['RP_TIMEOUT_SUFFIX']):
+    # Only simulate the bounded failure when timeout policy is actually supplied.
+    if '--connect-timeout' not in args or '--max-time' not in args:
+        print('download would wait without configured timeout', file=sys.stderr)
+        sys.exit(99)
+    assert 0 < int(args[args.index('--connect-timeout')+1]) <= 30
+    assert 0 < int(args[args.index('--max-time')+1]) <= 300
+    print('curl: (28) Operation timed out', file=sys.stderr)
+    sys.exit(28)
+shutil.copyfile(pathlib.Path(os.environ['RP_FIXTURE_DIR'])/url.rsplit('/',1)[1],args[args.index('-o')+1])
+""")
+        self.env['RP_TIMEOUT_SUFFIX'] = suffix
+        result = self.run_install()
+        self.assertEqual(result.returncode, 28, result.stderr)
+        self.assertIn('timed out', result.stderr)
+        self.assertEqual(destination.read_bytes(), b'old installation')
+        self.assertFalse(list(self.install.glob('.repopilot-install.*')))
+
+    def test_archive_download_timeout_keeps_existing_install(self):
+        self.download_timeout('.tar.gz')
+
+    def test_checksum_download_timeout_keeps_existing_install(self):
+        self.download_timeout('.sha256')
+
     def test_invalid_version_is_rejected_before_install(self):
         self.env["REPOPILOT_VERSION"] = "v0.1.0/../../bad"
         result = self.run_install()

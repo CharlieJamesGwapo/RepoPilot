@@ -237,7 +237,7 @@ fn connect_guides_save_and_an_authorized_minimal_probe() {
     let (ep, h) = server("200 OK", r#"{"choices":[{"message":{"content":"OK"}}]}"#);
     let mut child = Command::new(env!("CARGO_BIN_EXE_repopilot"))
         .current_dir(d.path())
-        .args(["--config", "p.toml", "chat"])
+        .args(["--config", "p.toml", "chat", "--max-output-tokens", "8"])
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
@@ -252,6 +252,9 @@ fn connect_guides_save_and_an_authorized_minimal_probe() {
     assert!(o.status.success());
     let request = h.join().unwrap();
     assert!(request.contains("Reply with OK."));
+    let body: serde_json::Value =
+        serde_json::from_str(request.split("\r\n\r\n").nth(1).unwrap()).unwrap();
+    assert_eq!(body["max_tokens"], 8);
     assert!(
         String::from_utf8_lossy(&o.stdout).contains("Connectivity and text generation succeeded")
     );
@@ -260,4 +263,167 @@ fn connect_guides_save_and_an_authorized_minimal_probe() {
             .unwrap()
             .contains("providers.new")
     );
+}
+
+#[test]
+fn output_budget_and_provider_usage_are_explicit() {
+    let d = TempDir::new().unwrap();
+    let (ep, h) = server(
+        "200 OK",
+        r#"{"choices":[{"message":{"content":"bounded answer"},"finish_reason":"length"}],"usage":{"prompt_tokens":12,"completion_tokens":8,"total_tokens":20}}"#,
+    );
+    config(&d, &ep, "");
+    let o = run(
+        &d,
+        &[
+            "ask",
+            "question",
+            "--local",
+            "--max-output-tokens",
+            "8",
+            "--json",
+        ],
+    );
+    assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
+    let value: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
+    assert_eq!(value["answer"], "bounded answer");
+    assert_eq!(value["usage"]["prompt_tokens"], 12);
+    assert_eq!(value["output_limit"], 8);
+    assert_eq!(value["finish_reason"], "length");
+    let request = h.join().unwrap();
+    let body: serde_json::Value =
+        serde_json::from_str(request.split("\r\n\r\n").nth(1).unwrap()).unwrap();
+    assert_eq!(body["max_tokens"], 8);
+    assert_eq!(body["messages"].as_array().unwrap().len(), 1);
+}
+#[test]
+fn omitted_budget_is_not_sent_and_missing_usage_is_not_invented() {
+    let d = TempDir::new().unwrap();
+    let (ep, h) = server(
+        "200 OK",
+        r#"{"choices":[{"message":{"content":"answer"}}]}"#,
+    );
+    config(&d, &ep, "");
+    let o = run(&d, &["ask", "question", "--local", "--json"]);
+    assert!(o.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
+    assert!(value.get("usage").is_some_and(serde_json::Value::is_null));
+    let request = h.join().unwrap();
+    assert!(!request.contains("max_tokens"));
+}
+#[test]
+fn invalid_output_budgets_fail_before_any_provider_call() {
+    let d = TempDir::new().unwrap();
+    config(&d, "http://127.0.0.1:1/v1", "");
+    for limit in ["0", "32769", "-1", "abc"] {
+        let o = run(
+            &d,
+            &["ask", "question", "--max-output-tokens", limit, "--local"],
+        );
+        assert!(!o.status.success());
+        assert!(!String::from_utf8_lossy(&o.stderr).contains("Provider connection failed"));
+    }
+}
+
+#[test]
+fn chat_budget_and_usage_are_session_local() {
+    use std::process::Stdio;
+    let d = TempDir::new().unwrap();
+    let (ep, h) = server(
+        "200 OK",
+        r#"{"choices":[{"message":{"content":"bounded chat answer"},"finish_reason":"length"}],"usage":{"prompt_tokens":9,"completion_tokens":4,"total_tokens":13}}"#,
+    );
+    config(&d, &ep, "");
+    let original = fs::read(d.path().join("p.toml")).unwrap();
+    let mut child = Command::new(env!("CARGO_BIN_EXE_repopilot"))
+        .current_dir(d.path())
+        .args([
+            "--config",
+            "p.toml",
+            "chat",
+            "--local",
+            "--max-output-tokens",
+            "10",
+        ])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(b"/budget 4\nhello\n/usage\n/budget off\n/budget\n/budget 0\n/exit\n")
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert!(out.status.success());
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert!(
+        text.contains("bounded chat answer") && text.contains("token limit"),
+        "{text}"
+    );
+    assert!(
+        text.contains("\"completion_tokens\": 4") && text.contains("\"successful_requests\": 1"),
+        "{text}"
+    );
+    assert!(text.contains("\"max_output_tokens\": null"), "{text}");
+    assert!(String::from_utf8_lossy(&out.stderr).contains("/budget 1..32768"));
+    let request = h.join().unwrap();
+    let body: serde_json::Value =
+        serde_json::from_str(request.split("\r\n\r\n").nth(1).unwrap()).unwrap();
+    assert_eq!(body["max_tokens"], 4);
+    assert_eq!(fs::read(d.path().join("p.toml")).unwrap(), original);
+}
+#[test]
+fn output_budget_never_executes_an_unsupported_process_adapter() {
+    let d = TempDir::new().unwrap();
+    fs::write(d.path().join("p.toml"),"active='mock'\n[providers.mock]\nkind='process'\nexecutable='repopilot-process-must-not-run-5d8bf'\n").unwrap();
+    let out = run(
+        &d,
+        &["ask", "hello", "--allow-exec", "--max-output-tokens", "4"],
+    );
+    assert_eq!(out.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("only by compatible HTTP providers"));
+}
+#[test]
+fn malformed_usage_is_not_treated_as_a_token_measurement() {
+    let d = TempDir::new().unwrap();
+    let (ep, h) = server(
+        "200 OK",
+        r#"{"choices":[{"message":{"content":"answer"}}],"usage":{"prompt_tokens":-1,"completion_tokens":"many"}}"#,
+    );
+    config(&d, &ep, "");
+    let out = run(&d, &["ask", "hello", "--local", "--json"]);
+    assert!(out.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(value["usage"].is_null());
+    h.join().unwrap();
+}
+
+#[test]
+fn zero_visible_text_at_the_limit_preserves_usage_and_finish_reason() {
+    let d = TempDir::new().unwrap();
+    let (ep, h) = server(
+        "200 OK",
+        r#"{"choices":[{"message":{"content":""},"finish_reason":"length"}],"usage":{"prompt_tokens":4,"completion_tokens":1,"total_tokens":5}}"#,
+    );
+    config(&d, &ep, "");
+    let o = run(
+        &d,
+        &[
+            "ask",
+            "hello",
+            "--local",
+            "--max-output-tokens",
+            "1",
+            "--json",
+        ],
+    );
+    assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
+    let v: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
+    assert_eq!(v["answer"], "");
+    assert_eq!(v["finish_reason"], "length");
+    assert_eq!(v["usage"]["completion_tokens"], 1);
+    h.join().unwrap();
 }

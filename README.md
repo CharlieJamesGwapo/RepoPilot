@@ -77,6 +77,10 @@ repopilot skills export debugging --path . --dry-run
 
 Portable export is the default; Codex and Claude project layouts are optional. Exports include licenses, never overwrite an existing skill directory, and launch no agent. Included in v0.2.0 binaries and Homebrew installations. See [skills](docs/skills.md) for all ten workflows and export details.
 
+## Next release candidate
+
+The current source includes optional [local coding-model presets](docs/local-models.md), [response budgets and measured provider usage](docs/token-controls.md), and security hardening. See the [release-readiness review](docs/release-readiness.md). These additions are under release review and are **not in the published v0.2.0/Homebrew binaries yet**. Offline work needs no model; model weights and runtime installation stay explicit.
+
 ## Learn more
 
 - [User guide](docs/user-guide.md) — the full shell, diagnostics, guides, and chat workflow

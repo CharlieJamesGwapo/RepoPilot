@@ -30,8 +30,8 @@ name="repopilot-$version-$target"
 asset="$name.tar.gz"
 base="https://github.com/CharlieJamesGwapo/RepoPilot/releases/download/$version"
 printf 'Downloading RepoPilot %s for %s...\n' "$version" "$target"
-curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$base/$asset" -o "$workdir/$asset"
-curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 "$base/$asset.sha256" -o "$workdir/checksum"
+curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --connect-timeout 15 --max-time 180 "$base/$asset" -o "$workdir/$asset"
+curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --connect-timeout 15 --max-time 180 "$base/$asset.sha256" -o "$workdir/checksum"
 expected=$(awk 'NR == 1 {print $1}' "$workdir/checksum")
 case "$expected" in *[!0-9a-fA-F]*|'') echo 'Invalid SHA-256 checksum file.' >&2; exit 1 ;; esac
 [ "${#expected}" -eq 64 ] || { echo 'Invalid SHA-256 checksum length.' >&2; exit 1; }

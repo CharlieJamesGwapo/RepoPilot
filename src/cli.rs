@@ -44,6 +44,11 @@ pub enum Cmd {
     },
     /// Show curated offline workflows; omit the task to list topics. Executes nothing.
     Guide { task: Vec<String> },
+    /// Browse optional local model presets or create an explicit local config.
+    Models {
+        #[command(subcommand)]
+        action: ModelAction,
+    },
     /// Open your real shell with normal terminal support (also the default).
     #[command(
         after_help = "Interactive Zsh/Bash sessions show the RepoPilot folder and Git prompt.\nYour startup configuration, installed commands and terminal job control remain available.\nType exit to return. --json and --config do not apply to shell mode."
@@ -92,6 +97,9 @@ pub enum Cmd {
     Chat {
         #[arg(long)]
         local: bool,
+        /// Optional completion-token ceiling for this chat session.
+        #[arg(long, value_parser = clap::value_parser!(u32).range(1..=32768))]
+        max_output_tokens: Option<u32>,
     },
 }
 #[derive(Subcommand)]
@@ -111,6 +119,9 @@ pub struct AiOptions {
     /// Reject all non-loopback endpoints and process adapters.
     #[arg(long)]
     pub local: bool,
+    /// Optional completion-token ceiling sent to compatible HTTP providers (1..32768).
+    #[arg(long, value_parser = clap::value_parser!(u32).range(1..=32768))]
+    pub max_output_tokens: Option<u32>,
 }
 #[derive(Subcommand)]
 pub enum ProviderAction {
@@ -204,4 +215,16 @@ impl SkillTarget {
             Self::Claude => ".claude",
         }
     }
+}
+
+#[derive(Subcommand)]
+pub enum ModelAction {
+    /// List offline model presets, licenses and explicit download instructions.
+    List,
+    /// Create a new local-only configuration; never downloads models or overwrites files.
+    Setup {
+        preset: String,
+        #[arg(long)]
+        output: PathBuf,
+    },
 }

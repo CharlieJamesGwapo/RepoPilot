@@ -8,6 +8,8 @@ shell                     # explicit shell entry point
 shell [--plain-prompt]
 welcome
 guide [topic words...]
+models list
+models setup <preset> --output <new-config-path>
 skills list [--pack development|ui-ux]
 skills show <id>
 skills export <id> [--path <existing-project>] [--target portable|codex|claude] [--dry-run]
@@ -90,3 +92,5 @@ Use `repopilot shell --plain-prompt`, or set `REPOPILOT_PROMPT=off`, to disable 
 The two-line prompt is `[RepoPilot] my-project git:(main)` followed by `> `. A detached checkout uses `git:(@a1b2c3d)`; a failed previous command adds `[exit 1]` (with the actual nonzero code). Git queries inspect branch/commit metadata without scanning working-tree changes. Run `exit` to leave the shell session.
 
 Built-in skills are included in v0.2.0 binaries and Homebrew installations. See [skills](skills.md) for output, export, and attribution details.
+
+Current release-candidate source additionally supports `ask --max-output-tokens 1..32768`, `chat --max-output-tokens 1..32768`, `/budget`, and `/usage`. See [token controls](token-controls.md) and [local models](local-models.md); these are not in published v0.2.0 yet.

@@ -20,9 +20,9 @@ try {
     $archive = Join-Path $workDir $asset
     Write-Output "Downloading RepoPilot $Version for Windows x64..."
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri "$base/$asset" -OutFile $archive -UseBasicParsing
+    Invoke-WebRequest -Uri "$base/$asset" -OutFile $archive -UseBasicParsing -TimeoutSec 180
     $checksum = Join-Path $workDir 'checksum'
-    Invoke-WebRequest -Uri "$base/$asset.sha256" -OutFile $checksum -UseBasicParsing
+    Invoke-WebRequest -Uri "$base/$asset.sha256" -OutFile $checksum -UseBasicParsing -TimeoutSec 180
     $expected = ((Get-Content -LiteralPath $checksum -Raw).Trim() -split '\s+')[0]
     if ($expected -notmatch '^[0-9a-fA-F]{64}$') { throw 'Invalid SHA-256 checksum file.' }
     if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $expected) {

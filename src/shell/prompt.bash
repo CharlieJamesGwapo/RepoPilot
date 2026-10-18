@@ -29,5 +29,6 @@ _repopilot_prompt() {
 if [[ $(declare -p PROMPT_COMMAND 2>/dev/null) == 'declare -a '* ]]; then
   PROMPT_COMMAND=(_repopilot_capture "${PROMPT_COMMAND[@]}" _repopilot_prompt)
 else
-  PROMPT_COMMAND="_repopilot_capture; ${PROMPT_COMMAND:+$PROMPT_COMMAND; }_repopilot_prompt"
+  # Newlines preserve valid hooks ending with a semicolon or shell comment.
+  PROMPT_COMMAND=$'_repopilot_capture\n'"${PROMPT_COMMAND:-}"$'\n_repopilot_prompt'
 fi

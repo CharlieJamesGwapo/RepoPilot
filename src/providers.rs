@@ -25,10 +25,34 @@ pub struct Capabilities {
     pub authentication: &'static str,
     pub execution: &'static str,
 }
+#[derive(Default, Serialize, Clone)]
+pub struct Usage {
+    pub prompt_tokens: Option<u64>,
+    pub completion_tokens: Option<u64>,
+    pub total_tokens: Option<u64>,
+}
+#[derive(Serialize)]
+pub struct Generation {
+    pub text: String,
+    pub usage: Option<Usage>,
+    pub finish_reason: Option<String>,
+}
 pub trait Provider {
     fn capabilities(&self) -> Capabilities;
     fn generate(&self, prompt: &str) -> Result<String>;
     fn models(&self) -> Result<Vec<String>>;
+    fn generate_with_limit(&self, prompt: &str, limit: Option<u32>) -> Result<Generation> {
+        if limit.is_some() {
+            bail!(
+                "Output-token limits are supported only by compatible HTTP providers; process adapters cannot enforce them"
+            );
+        }
+        Ok(Generation {
+            text: self.generate(prompt)?,
+            usage: None,
+            finish_reason: None,
+        })
+    }
 }
 pub struct Api<'a> {
     pub config: &'a ProviderConfig,
@@ -200,16 +224,52 @@ impl Provider for Api<'_> {
         )
     }
     fn generate(&self, prompt: &str) -> Result<String> {
+        Ok(self.generate_with_limit(prompt, None)?.text)
+    }
+    fn generate_with_limit(&self, prompt: &str, limit: Option<u32>) -> Result<Generation> {
         if prompt.len() > 65536 {
-            bail!("Prompt exceeds 64 KiB limit")
+            bail!("Prompt exceeds 64 KiB limit");
         }
-        let v=self.request("chat/completions",Some(json!({"model":self.config.model,"messages":[{"role":"user","content":prompt}],"stream":false})))?;
+        if limit.is_some_and(|v| !(1..=32768).contains(&v)) {
+            bail!("Output-token limit must be 1..32768");
+        }
+        let mut body = json!({"model":self.config.model,"messages":[{"role":"user","content":prompt}],"stream":false});
+        if let Some(limit) = limit {
+            body["max_tokens"] = json!(limit);
+        }
+        let v = self.request("chat/completions", Some(body))?;
         let s = v
             .pointer("/choices/0/message/content")
             .and_then(Value::as_str)
-            .filter(|s| !s.is_empty())
+            .filter(|s| {
+                !s.is_empty()
+                    || v.pointer("/choices/0/finish_reason")
+                        .and_then(Value::as_str)
+                        == Some("length")
+            })
             .context("Unsupported completion response: expected choices[0].message.content text")?;
-        Ok(clean(s, self.config))
+        let usage = v
+            .get("usage")
+            .and_then(Value::as_object)
+            .map(|u| Usage {
+                prompt_tokens: u.get("prompt_tokens").and_then(Value::as_u64),
+                completion_tokens: u.get("completion_tokens").and_then(Value::as_u64),
+                total_tokens: u.get("total_tokens").and_then(Value::as_u64),
+            })
+            .filter(|u| {
+                u.prompt_tokens.is_some()
+                    || u.completion_tokens.is_some()
+                    || u.total_tokens.is_some()
+            });
+        let finish_reason = v
+            .pointer("/choices/0/finish_reason")
+            .and_then(Value::as_str)
+            .map(|s| clean(s, self.config));
+        Ok(Generation {
+            text: clean(s, self.config),
+            usage,
+            finish_reason,
+        })
     }
     fn models(&self) -> Result<Vec<String>> {
         let v = self.request("models", None)?;

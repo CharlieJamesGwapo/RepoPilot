@@ -123,6 +123,20 @@ impl Config {
             {
                 bail!("key_env must name an environment variable; raw keys are unsupported")
             }
+            // Validate original text before URL parsing can normalize controls away.
+            // These metadata fields can appear in terminal consent and status output.
+            for (field, value) in [
+                ("endpoint", &p.endpoint),
+                ("model", &p.model),
+                ("executable", &p.executable),
+            ] {
+                if value
+                    .as_deref()
+                    .is_some_and(|text| text.chars().any(char::is_control))
+                {
+                    bail!("Provider {field} must not contain control characters");
+                }
+            }
             match p.kind.as_str() {
                 "api" | "local" => {
                     let u = url::Url::parse(p.endpoint.as_deref().unwrap_or("")).map_err(|_| {
