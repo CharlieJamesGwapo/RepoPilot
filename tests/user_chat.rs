@@ -31,12 +31,10 @@ fn chat(home: &Path, cwd: &Path, input: &str, args: &[&str], xdg: Option<&Path>)
         .stderr(Stdio::piped())
         .spawn()
         .unwrap();
-    child
-        .stdin
-        .take()
-        .unwrap()
-        .write_all(input.as_bytes())
-        .unwrap();
+    // A rejected config can make the child exit before it reads stdin.
+    if let Err(err) = child.stdin.take().unwrap().write_all(input.as_bytes()) {
+        assert_eq!(err.kind(), std::io::ErrorKind::BrokenPipe, "{err}");
+    }
     child.wait_with_output().unwrap()
 }
 fn mock() -> (String, thread::JoinHandle<String>) {
